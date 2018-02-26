@@ -6,10 +6,9 @@
 
     <color name="black">#000000</color>
 
-    <color name="qr_code_white">#FFFFFFFF</color>
-    <color name="qr_code_flashlight_bg">#66000000</color>
-    <color name="qr_code_finder_mask">#80000000</color>
-    <color name="qr_code_flash_light_text_color">#66FFFFFF</color>
-    <color name="qr_code_finder_frame">#FFFFFFFF</color>
-    <color name="qr_code_finder_laser">#25f705</color>
+    <color name="viewfinder_mask">#60000000</color>
+    <color name="viewfinder_laser">#ffcc0000</color>
+    <color name="viewfinder_border">#c41114</color>
+    <color name="viewfinder_border_blur">#d9414b</color>
+
 </resources>

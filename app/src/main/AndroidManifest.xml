@@ -3,7 +3,6 @@
     package="com.patrykkosieradzki.qrcodereader">
 
     <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -22,8 +21,8 @@
         </activity>
         <activity
             android:name=".QRActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
