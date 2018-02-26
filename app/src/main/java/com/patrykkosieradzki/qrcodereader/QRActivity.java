@@ -6,12 +6,8 @@ import android.content.pm.PackageManager;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-
 import com.google.zxing.Result;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -41,27 +37,21 @@ public class QRActivity extends AppCompatActivity implements ZXingScannerView.Re
     }
 
     private void initScannerView() {
-        mScannerView.setLaserEnabled(false);
         mScannerView.setSquareViewFinder(true);
-        mScannerView.setAutoFocus(true);
         mScannerView.setResultHandler(this);
+        mScannerView.setLaserEnabled(false);
+        mScannerView.setAutoFocus(true);
         mScannerView.startCamera();
     }
 
     @Override
     public void onRequestPermissionsResult(
             int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CAMERA: {
-
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    initScannerView();
-
-                } else {
-
-                }
+        if (requestCode == REQUEST_CAMERA) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                initScannerView();
+            } else {
+                // TODO: Handle retarded user
             }
         }
     }
