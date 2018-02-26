@@ -23,6 +23,7 @@
             android:name=".ui.QRActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.LoginActivity"></activity>
     </application>
 
 </manifest>

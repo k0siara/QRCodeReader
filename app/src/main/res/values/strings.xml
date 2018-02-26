@@ -1,8 +1,12 @@
 <resources>
-    <string name="app_name">QRCodeReader</string>
+    <string name="app_name">QR Code Reader</string>
 
     <integer name="viewfinder_border_width">5</integer>
     <integer name="viewfinder_border_blur_width">10</integer>
     <integer name="viewfinder_border_length">60</integer>
-    <string name="title_activity_main">MainActivity</string>
+
+    <string name="action_how_it_works">How it works</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
+
 </resources>
