@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.patrykkosieradzki.qrcodereader.QRActivity">
@@ -9,9 +9,40 @@
     <com.patrykkosieradzki.qrcodereader.QRCodeReaderView
         android:id="@+id/qr"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="match_parent" />
 
-        />
+    <ImageView
+        android:id="@+id/qr_rect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/rect"
+        android:layout_centerInParent="true"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black"
+        android:alpha="0.2" />
+
+    <LinearLayout
+        android:id="@+id/layout_flashlight"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        >
+
+        <ImageView
+            android:id="@+id/flashlight"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:src="@drawable/flashlight_off"
+            />
+
+    </LinearLayout>
     
 
 </RelativeLayout>
