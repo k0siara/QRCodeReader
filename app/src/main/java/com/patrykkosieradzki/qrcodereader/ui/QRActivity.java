@@ -1,4 +1,4 @@
-package com.patrykkosieradzki.qrcodereader;
+package com.patrykkosieradzki.qrcodereader.ui;
 
 import android.Manifest;
 import android.content.Intent;
@@ -8,6 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import com.google.zxing.Result;
+import com.patrykkosieradzki.qrcodereader.R;
+import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

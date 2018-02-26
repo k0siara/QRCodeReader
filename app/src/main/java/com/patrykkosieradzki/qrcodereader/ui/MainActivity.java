@@ -1,4 +1,4 @@
-package com.patrykkosieradzki.qrcodereader;
+package com.patrykkosieradzki.qrcodereader.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.TextView;
+
+import com.patrykkosieradzki.qrcodereader.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == QR_READ) {
-            Snackbar.make(findViewById(R.id.coordinatorLayout), data.getExtras().get("data").toString(), Snackbar.LENGTH_LONG)
+            String text = data != null ? data.getExtras().get("data").toString() : "No QR Code Found.";
+            Snackbar.make(findViewById(R.id.coordinatorLayout), text, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
         }
     }

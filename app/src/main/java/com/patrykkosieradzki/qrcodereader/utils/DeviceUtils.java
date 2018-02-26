@@ -1,4 +1,4 @@
-package com.patrykkosieradzki.qrcodereader;
+package com.patrykkosieradzki.qrcodereader.utils;
 
 import android.app.Activity;
 import android.content.Context;
