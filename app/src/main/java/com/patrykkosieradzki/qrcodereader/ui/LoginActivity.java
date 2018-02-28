@@ -1,8 +1,11 @@
 package com.patrykkosieradzki.qrcodereader.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
 
@@ -17,6 +20,7 @@ import com.patrykkosieradzki.qrcodereader.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -36,22 +40,22 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_WIDE);
-        signInButton.setColorScheme(SignInButton.COLOR_LIGHT);
-        signInButton.setScopes(gso.getScopeArray());
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signIn();
-            }
-        });
     }
 
-    private void signIn() {
+    @OnClick(R.id.signInButton)
+    public void onSignInButtonClick() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @OnClick(R.id.continueWithoutSigningInButton)
+    public void onContinueWithoutSigningInButtonClick() {
+        SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("first_run", 0);
+        editor.apply();
+
+        updateUI(null);
     }
 
     @Override
@@ -69,10 +73,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt("first_run", 0);
+            editor.apply();
 
-            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             updateUI(account);
+
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
@@ -81,17 +89,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        updateUI(account);
-    }
-
     private void updateUI(GoogleSignInAccount account) {
-        if (account != null) {
-            finish();
-        }
+        startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+        finish();
     }
 }

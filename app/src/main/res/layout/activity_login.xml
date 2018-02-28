@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.patrykkosieradzki.qrcodereader.ui.LoginActivity">
 
     <RelativeLayout
@@ -26,23 +27,24 @@
                 android:src="@drawable/google_logo" />
 
             <TextView
+                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="Google Identity"
-                android:textSize="32sp"
+                android:layout_marginTop="14dp"
                 android:gravity="center"
-                android:id="@+id/textView"
-                android:layout_marginTop="14dp" />
+                android:text="Sign in"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="32sp" />
 
             <TextView
+                android:id="@+id/textView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Android Sign in With Google"
-                android:id="@+id/textView2"
-                android:textSize="16sp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:text="with your Google Account"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="16sp" />
+
 
         </LinearLayout>
 
@@ -57,9 +59,11 @@
         >
 
         <com.google.android.gms.common.SignInButton
-            android:id="@+id/sign_in_button"
+            android:id="@+id/signInButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:colorScheme="light"
+            app:buttonSize="wide"
             android:layout_centerInParent="true"
             />
 
@@ -82,7 +86,7 @@
                 android:layout_height="wrap_content">
 
                 <Button
-                    android:id="@+id/registerButton"
+                    android:id="@+id/continueWithoutSigningInButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@null"
