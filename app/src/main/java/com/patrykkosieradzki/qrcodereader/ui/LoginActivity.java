@@ -31,7 +31,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final String TAG = "LoginActivity";
     private static final int RC_SIGN_IN = 0;
 
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +43,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .requestEmail()
                 .build();
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API)
-                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
     }
 
     @OnClick(R.id.signInButton)
     public void onSignInButtonClick() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
