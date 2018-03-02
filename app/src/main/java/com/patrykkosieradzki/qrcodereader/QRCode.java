@@ -1,23 +1,11 @@
 package com.patrykkosieradzki.qrcodereader;
 
-import android.graphics.Bitmap;
-
 public class QRCode {
 
-    private Bitmap image;
     private String text;
 
-    public QRCode(Bitmap image, String text) {
-        this.image = image;
+    public QRCode(String text) {
         this.text = text;
-    }
-
-    public Bitmap getImage() {
-        return image;
-    }
-
-    public void setImage(Bitmap image) {
-        this.image = image;
     }
 
     public String getText() {

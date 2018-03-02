@@ -1,9 +1,13 @@
 package com.patrykkosieradzki.qrcodereader;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -13,6 +17,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     public CustomAdapter() {
         mDataSet = new ArrayList<>();
+
+        for (int i = 0; i < 20; i++) {
+            addQRCode(new QRCode(String.valueOf(i)));
+        }
     }
 
     public void addQRCode(QRCode qrCode) {
@@ -21,12 +29,17 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return null;
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
+
+        return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-
+        holder.textView.setText(mDataSet.get(position).getText());
+        holder.textView.setOnClickListener(v -> {
+            // on click
+        });
     }
 
     @Override
@@ -37,22 +50,21 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
+        private TextView textView;
 
         public ViewHolder(View v) {
             super(v);
             // Define click listener for the ViewHolder's View.
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            v.setOnClickListener(v1 -> {
 
-                }
             });
-            textView = (TextView) v.findViewById(R.id.textView);
+
+            textView =  v.findViewById(R.id.text);
         }
 
         public TextView getTextView() {
             return textView;
         }
     }
+
 }
