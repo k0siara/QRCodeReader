@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.firebase.auth.FirebaseAuth;
 import com.patrykkosieradzki.qrcodereader.R;
 
 public class MainActivity extends Activity {
@@ -17,7 +18,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         Class<?> cls;
-        if (GoogleSignIn.getLastSignedInAccount(this) == null && isFirstRun()) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null && !isLoggedIn()) {
             cls = LoginActivity.class;
         } else {
             cls = HomeActivity.class;
@@ -27,7 +28,7 @@ public class MainActivity extends Activity {
         finish();
     }
 
-    private boolean isFirstRun() {
-        return getSharedPreferences("login", Context.MODE_PRIVATE).getInt("first_run", 1) == 1;
+    private boolean isLoggedIn() {
+        return getSharedPreferences("login", Context.MODE_PRIVATE).getInt("logged_in", 0) == 1;
     }
 }

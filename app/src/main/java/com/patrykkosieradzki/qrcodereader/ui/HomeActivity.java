@@ -15,40 +15,52 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.patrykkosieradzki.qrcodereader.CustomAdapter;
 import com.patrykkosieradzki.qrcodereader.R;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class HomeActivity extends AppCompatActivity {
 
     public static final int QR_READ = 0;
 
-    protected RecyclerView mRecyclerView;
+    @BindView(R.id.toolbar) protected Toolbar toolbar;
+    @BindView(R.id.recyclerView) protected RecyclerView mRecyclerView;
+    @BindView(R.id.fab) protected FloatingActionButton fab;
+
     protected CustomAdapter mAdapter;
     protected RecyclerView.LayoutManager mLayoutManager;
+
+    private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityForResult(new Intent(HomeActivity.this, QRActivity.class), QR_READ);
-            }
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        fab.setOnClickListener(v -> {
+            startActivityForResult(new Intent(HomeActivity.this, QRActivity.class), QR_READ);
         });
 
 
-        mRecyclerView = findViewById(R.id.recyclerView);
         mLayoutManager = new LinearLayoutManager(this);
 
     }
@@ -87,30 +99,27 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("first_run", 1);
-        editor.apply();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) {
+            mAuth.signOut();
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        if (GoogleSignIn.getLastSignedInAccount(this) != null) {
-            mGoogleSignInClient.signOut()
-                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            finish();
-                        }
+            mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                    task -> {
+                        updateLoginState();
+                        startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+                        finish();
                     });
         } else {
             // TODO: Handle user without google login
-        }
 
-        startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+        }
+    }
+
+    private void updateLoginState() {
+        SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("logged_in", 0);
+        editor.apply();
     }
 
     @Override

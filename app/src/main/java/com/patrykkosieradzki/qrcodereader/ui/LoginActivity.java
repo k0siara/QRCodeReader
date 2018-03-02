@@ -3,38 +3,27 @@ package com.patrykkosieradzki.qrcodereader.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telecom.Call;
 import android.util.Log;
-import android.view.View;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.patrykkosieradzki.qrcodereader.R;
+import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
     private static final int RC_SIGN_IN = 0;
@@ -57,6 +46,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         mAuth = FirebaseAuth.getInstance();
     }
 
+
     @OnClick(R.id.signInButton)
     public void onSignInButtonClick() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -65,12 +55,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @OnClick(R.id.continueWithoutSigningInButton)
     public void onContinueWithoutSigningInButtonClick() {
-        SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("first_run", 0);
-        editor.apply();
-
-        updateUI(null);
+        firebaseAnonymousAuth();
     }
 
     @Override
@@ -84,15 +69,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
 
-                SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putInt("first_run", 0);
-                editor.apply();
-
             } catch (ApiException e) {
-                // The ApiException status code indicates the detailed failure reason.
-                // Please refer to the GoogleSignInStatusCodes class reference for more information.
                 Log.w(TAG, "Google sign in failed", e);
+                handleError();
             }
         }
     }
@@ -100,38 +79,68 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
+        // TODO: add progress dialog
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Snackbar.make(findViewById(R.id.layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-
-                        }
-
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "signInWithCredential:success");
+                        finishActivity();
+                    } else {
+                        Log.w(TAG, "signInWithCredential:failure", task.getException());
+                        handleError();
                     }
                 });
     }
 
     private void firebaseAnonymousAuth() {
-
+        if (DeviceUtils.INSTANCE.isNetworkAvailable(this)) {
+            mAuth.signInAnonymously()
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "signInAnonymously:success");
+                            finishActivity();
+                        } else {
+                            Log.w(TAG, "signInAnonymously:failure", task.getException());
+                            handleError();
+                        }
+                    });
+        } else {
+            finishActivity();
+        }
     }
 
-    private void updateUI(FirebaseUser user) {
+    private void handleError() {
+        String text;
+        if (!DeviceUtils.INSTANCE.isNetworkAvailable(getApplicationContext())) {
+            text = "No network connection available.";
+        } else {
+            text = "Authentication failed.";
+        }
+
+        Snackbar.make(findViewById(R.id.layout), text, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mAuth.getCurrentUser() != null) {
+            finishActivity();
+        }
+    }
+
+    private void finishActivity() {
+        updateLoginState(1);
         startActivity(new Intent(LoginActivity.this, HomeActivity.class));
         finish();
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+    private void updateLoginState(int state) {
+        SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("logged_in", state);
+        editor.apply();
     }
+
 }

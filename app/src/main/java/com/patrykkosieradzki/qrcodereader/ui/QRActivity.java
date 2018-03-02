@@ -20,8 +20,8 @@ public class QRActivity extends AppCompatActivity implements ZXingScannerView.Re
 
     private static final int REQUEST_CAMERA = 0;
 
-    @BindView(R.id.scanner_view) ZXingScannerView mScannerView;
-    @BindView(R.id.flashlight) ImageView flashlight;
+    @BindView(R.id.scanner_view) protected ZXingScannerView mScannerView;
+    @BindView(R.id.flashlight) protected ImageView flashlight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +34,8 @@ public class QRActivity extends AppCompatActivity implements ZXingScannerView.Re
     }
 
     private void checkCameraPermission() {
-        if (!DeviceUtils.hasPermission(this, Manifest.permission.CAMERA)) {
-            DeviceUtils.requestPermission(this, Manifest.permission.CAMERA, REQUEST_CAMERA);
+        if (!DeviceUtils.INSTANCE.hasPermission(this, Manifest.permission.CAMERA)) {
+            DeviceUtils.INSTANCE.requestPermission(this, Manifest.permission.CAMERA, REQUEST_CAMERA);
         }
     }
 
