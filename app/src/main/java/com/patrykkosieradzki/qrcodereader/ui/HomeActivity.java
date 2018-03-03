@@ -3,6 +3,7 @@ package com.patrykkosieradzki.qrcodereader.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -78,7 +79,7 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-                
+
             }
 
             @Override
@@ -94,7 +95,25 @@ public class HomeActivity extends AppCompatActivity {
         if (resultCode == QR_READ) {
             String text = data != null ? data.getExtras().get("data").toString() : "No QR Code Found.";
             Snackbar.make(findViewById(R.id.coordinatorLayout), text, Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+                    .setAction("URL", v -> {
+                        Uri webpage = Uri.parse(text);
+                        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+                        if (intent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(intent);
+                        }
+                    })
+                    .setAction("TEL", v -> {
+                        dialPhoneNumber(text);
+                    })
+                    .show();
+        }
+    }
+
+    public void dialPhoneNumber(String qrPhoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse(qrPhoneNumber));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
         }
     }
 
