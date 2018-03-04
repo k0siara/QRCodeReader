@@ -4,14 +4,28 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        private ImageView mQrImage;
+        private TextView mTitle;
+        private TextView mDataType;
+
+        private ViewHolder(View view) {
+            super(view);
+
+            mQrImage = view.findViewById(R.id.qrImage);
+            mTitle =  view.findViewById(R.id.title);
+            mDataType = view.findViewById(R.id.dataType);
+        }
+
+    }
 
     private ArrayList<QRCode> mDataSet;
 
@@ -19,12 +33,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         mDataSet = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            addQRCode(new QRCode(String.valueOf(i)));
+            mDataSet.add(new QRCode("1", "2", "3"));
         }
-    }
-
-    public void addQRCode(QRCode qrCode) {
-        mDataSet.add(qrCode);
     }
 
     @Override
@@ -36,10 +46,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.textView.setText(mDataSet.get(position).getText());
-        holder.textView.setOnClickListener(v -> {
-            // on click
-        });
+        holder.mTitle.setText(mDataSet.get(position).title);
+
     }
 
     @Override
@@ -49,22 +57,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView;
 
-        public ViewHolder(View v) {
-            super(v);
-            // Define click listener for the ViewHolder's View.
-            v.setOnClickListener(v1 -> {
-
-            });
-
-            textView =  v.findViewById(R.id.text);
-        }
-
-        public TextView getTextView() {
-            return textView;
-        }
-    }
 
 }

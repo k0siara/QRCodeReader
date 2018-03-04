@@ -1,18 +1,21 @@
 package com.patrykkosieradzki.qrcodereader;
 
+import com.google.firebase.database.IgnoreExtraProperties;
+
+@IgnoreExtraProperties
 public class QRCode {
 
-    private String text;
+    public String title;
+    public String description;
+    public String type;
 
-    public QRCode(String text) {
-        this.text = text;
+    public QRCode() {
+
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
+    public QRCode(String title, String description, String type) {
+        this.title = title;
+        this.description = description;
+        this.type = type;
     }
 }

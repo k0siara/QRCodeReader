@@ -16,8 +16,12 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.patrykkosieradzki.qrcodereader.R;
+import com.patrykkosieradzki.qrcodereader.model.User;
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
 
 import butterknife.ButterKnife;
@@ -29,7 +33,10 @@ public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 0;
 
     private GoogleSignInClient mGoogleSignInClient;
+
+    private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +50,8 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
     }
 
@@ -63,9 +72,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-
             try {
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
 
@@ -98,6 +106,14 @@ public class LoginActivity extends AppCompatActivity {
             mAuth.signInAnonymously()
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
+                            Log.d(TAG, "loggedInUser:success : " + task.getResult().getUser().getUid());
+
+                            FirebaseUser mCurrentUser = task.getResult().getUser();
+                            User mDatabaseUser = new User(
+                                    mCurrentUser.isAnonymous()
+                            );
+                            mDatabase.child("users").child(mCurrentUser.getUid()).setValue(mDatabaseUser);
+
                             Log.d(TAG, "signInAnonymously:success");
                             finishActivity();
                         } else {

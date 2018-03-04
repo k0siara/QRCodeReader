@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import com.google.zxing.Result;
+import com.google.zxing.client.result.ResultParser;
 import com.patrykkosieradzki.qrcodereader.R;
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
 
@@ -76,7 +77,8 @@ public class QRActivity extends AppCompatActivity implements ZXingScannerView.Re
         vibrator.vibrate(200L);
 
         Intent intent = new Intent();
-        intent.putExtra("data", result.getText());
+        intent.putExtra("text", result.getText());
+        intent.putExtra("type", ResultParser.parseResult(result).getType().name());
         setResult(HomeActivity.QR_READ, intent);
         finish();
     }

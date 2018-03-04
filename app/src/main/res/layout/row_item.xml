@@ -1,19 +1,55 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:layout_marginLeft="@dimen/margin_medium"
-    android:layout_marginRight="@dimen/margin_medium"
-    android:gravity="center_vertical"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:padding="5dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:orientation="horizontal"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp">
 
-    <TextView
-        android:id="@+id/text"
+    <RelativeLayout
+        android:id="@+id/imageLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:text="Example text"/>
-</RelativeLayout>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/qrImage"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/qr_code_image"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/textLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:text="https://www.facebook.com"
+            />
+
+        <TextView
+            android:id="@+id/dataType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:text="URL"/>
+
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>
