@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.zxing.client.result.ParsedResult;
 import com.google.zxing.client.result.ParsedResultType;
 import com.patrykkosieradzki.qrcodereader.CustomAdapter;
 import com.patrykkosieradzki.qrcodereader.QRCode;
@@ -97,15 +98,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == QR_READ) {
-            if (data.hasExtra("text") && data.hasExtra("type")) {
-
-                switch (data.getExtras().get("type").toString()) {
-                    case "ADDRESSBOOK":
-                        break;
-
-                    default:
-                        break;
-                }
+            if (data.hasExtra("text") ) {
 
 
 
@@ -115,7 +108,7 @@ public class HomeActivity extends AppCompatActivity {
                 QRCode qrCode = new QRCode(
                         data.getExtras().get("text").toString(),
                         "testDescription",
-                        data.getStringExtra("type")
+                        "type"
                 );
 
                 mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes").child(key).setValue(qrCode);

@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import com.google.zxing.Result;
+import com.google.zxing.client.result.ParsedResult;
 import com.google.zxing.client.result.ResultParser;
 import com.patrykkosieradzki.qrcodereader.R;
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
@@ -76,9 +77,51 @@ public class QRActivity extends AppCompatActivity implements ZXingScannerView.Re
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(200L);
 
+        ParsedResult parsedResult = ResultParser.parseResult(result);
+        switch (parsedResult.getType()) {
+            case ADDRESSBOOK:
+                break;
+
+            case EMAIL_ADDRESS:
+                break;
+
+            case PRODUCT:
+                break;
+
+            case URI:
+                break;
+
+            case TEXT:
+                break;
+
+            case GEO:
+                break;
+
+            case TEL:
+                break;
+
+            case SMS:
+                break;
+
+            case CALENDAR:
+                break;
+
+            case WIFI:
+                break;
+
+            case ISBN:
+                break;
+
+            case VIN:
+                break;
+
+            default:
+                break;
+        }
+
         Intent intent = new Intent();
         intent.putExtra("text", result.getText());
-        intent.putExtra("type", ResultParser.parseResult(result).getType().name());
+        //intent.putExtra("type", );
         setResult(HomeActivity.QR_READ, intent);
         finish();
     }
