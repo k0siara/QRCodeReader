@@ -1,5 +1,6 @@
 package com.patrykkosieradzki.qrcodereader;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,36 +8,26 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.patrykkosieradzki.qrcodereader.model.QRCode;
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        private ImageView mQrImage;
-        private TextView mTitle;
-        private TextView mDataType;
-
-        private ViewHolder(View view) {
-            super(view);
-
-            mQrImage = view.findViewById(R.id.qrImage);
-            mTitle =  view.findViewById(R.id.title);
-            mDataType = view.findViewById(R.id.dataType);
-        }
-
+public class CustomAdapter extends FirebaseRecyclerAdapter<QRCode, CustomAdapter.ViewHolder> {
+    
+    /**
+     * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
+     * {@link FirebaseRecyclerOptions} for configuration options.
+     *
+     * @param options
+     */
+    public CustomAdapter(@NonNull FirebaseRecyclerOptions<QRCode> options) {
+        super(options);
     }
 
-    private ArrayList<QRCode> mDataSet;
-
-    public CustomAdapter() {
-        mDataSet = new ArrayList<>();
-
-        for (int i = 0; i < 20; i++) {
-            mDataSet.add(new QRCode("1", "2", "3"));
-        }
-    }
-
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_item, parent, false);
@@ -45,18 +36,35 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.mTitle.setText(mDataSet.get(position).title);
+    protected void onBindViewHolder(@NonNull ViewHolder holder, int position, @NonNull QRCode model) {
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                getRef(position).removeValue();
+
+                return true;
+            }
+        });
+
+        holder.mText.setText(model.text);
+        holder.mDataType.setText(model.type);
 
     }
 
-    @Override
-    public int getItemCount() {
-        return mDataSet.size();
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        public ImageView mQrImage;
+        public TextView mText;
+        public TextView mDataType;
+
+        public ViewHolder(View view) {
+            super(view);
+
+            mQrImage = view.findViewById(R.id.qrImage);
+            mText =  view.findViewById(R.id.title);
+            mDataType = view.findViewById(R.id.dataType);
+        }
+
     }
-
-
-
-
 
 }

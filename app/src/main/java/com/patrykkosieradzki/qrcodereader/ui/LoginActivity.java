@@ -18,11 +18,19 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.patrykkosieradzki.qrcodereader.R;
+import com.patrykkosieradzki.qrcodereader.model.QRCode;
 import com.patrykkosieradzki.qrcodereader.model.User;
+import com.patrykkosieradzki.qrcodereader.utils.DateUtils;
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -93,7 +101,9 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "signInWithCredential:success");
-                        finishActivity();
+
+                        submitUser(task.getResult().getUser());
+
                     } else {
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                         handleError();
@@ -106,24 +116,48 @@ public class LoginActivity extends AppCompatActivity {
             mAuth.signInAnonymously()
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "loggedInUser:success : " + task.getResult().getUser().getUid());
+                            Log.d(TAG, "signInAnonymously:success uid:" + task.getResult().getUser().getUid());
 
-                            FirebaseUser mCurrentUser = task.getResult().getUser();
-                            User mDatabaseUser = new User(
-                                    mCurrentUser.isAnonymous()
-                            );
-                            mDatabase.child("users").child(mCurrentUser.getUid()).setValue(mDatabaseUser);
+                            submitUser(task.getResult().getUser());
 
-                            Log.d(TAG, "signInAnonymously:success");
-                            finishActivity();
                         } else {
                             Log.w(TAG, "signInAnonymously:failure", task.getException());
                             handleError();
                         }
                     });
         } else {
-            finishActivity();
+            finishActivity(); // TODO: fix diz shit
         }
+    }
+
+    private void submitUser(FirebaseUser user) {
+        mDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User databaseUser = dataSnapshot.getValue(User.class);
+
+                if (databaseUser == null) {
+                    writeNewUser(user.getUid());
+                    Log.d(TAG, "onDataChange: New user " + user.getUid() + " added to database");
+                } else {
+                    Log.d(TAG, "onDataChange: User already in the database, skipping adding new user to the database");
+                }
+
+                finishActivity();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "onCanceled: Failed to read user from the database");
+            }
+        });
+    }
+
+    private void writeNewUser(String uid) {
+        String currentDate = DateUtils.getCurrentDateAsString();
+        User mDatabaseUser = new User(currentDate);
+
+        mDatabase.child("users").child(uid).setValue(mDatabaseUser);
     }
 
     private void handleError() {

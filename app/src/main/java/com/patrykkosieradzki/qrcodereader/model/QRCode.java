@@ -2,20 +2,18 @@ package com.patrykkosieradzki.qrcodereader.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @IgnoreExtraProperties
-public class User {
+public class QRCode {
 
+    public String text;
+    public String type;
     public String createdAt;
-    public Map<String, QRCode> qrCodes;
 
-    public User(String createdAt) {
+    public QRCode(String text, String type, String createdAt) {
+        this.text = text;
+        this.type = type;
         this.createdAt = createdAt;
-        this.qrCodes = new HashMap<>();
     }
 
-    public User() {}
-
+    public QRCode() {}
 }

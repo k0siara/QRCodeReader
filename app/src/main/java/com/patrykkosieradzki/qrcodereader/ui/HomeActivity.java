@@ -13,28 +13,35 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.zxing.client.result.ParsedResult;
-import com.google.zxing.client.result.ParsedResultType;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.patrykkosieradzki.qrcodereader.CustomAdapter;
-import com.patrykkosieradzki.qrcodereader.QRCode;
+import com.patrykkosieradzki.qrcodereader.model.QRCode;
 import com.patrykkosieradzki.qrcodereader.R;
+import com.patrykkosieradzki.qrcodereader.model.User;
+import com.patrykkosieradzki.qrcodereader.utils.DateUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private static final String TAG = "HomeActivity";
     public static final int QR_READ = 0;
 
     @BindView(R.id.toolbar) protected Toolbar toolbar;
@@ -46,9 +53,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private GoogleSignInClient mGoogleSignInClient;
 
+    private FirebaseAuth mAuth;
     private FirebaseUser mCurrentUser;
     private DatabaseReference mDatabase;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,56 +70,42 @@ public class HomeActivity extends AppCompatActivity {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        mAuth = FirebaseAuth.getInstance();
+        mCurrentUser = mAuth.getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         fab.setOnClickListener(v -> startActivityForResult(new Intent(HomeActivity.this, QRActivity.class), QR_READ));
 
         mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager.setReverseLayout(true);
+        mLayoutManager.setStackFromEnd(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setHasFixedSize(true);
 
-        mAdapter = new CustomAdapter();
+        Query query = mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes");
+        query.keepSynced(true);
 
+        FirebaseRecyclerOptions options = new FirebaseRecyclerOptions.Builder<QRCode>()
+                .setQuery(query, QRCode.class)
+                .build();
+
+        mAdapter = new CustomAdapter(options);
         mRecyclerView.setAdapter(mAdapter);
+        mAdapter.startListening();
+
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-        mRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                return false;
-            }
-
-            @Override
-            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-            }
-
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-            }
-        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == QR_READ) {
-            if (data.hasExtra("text") ) {
+            if (data != null) {
 
-
-
-                mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-                String key = mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes").push().getKey();
-
-                QRCode qrCode = new QRCode(
-                        data.getExtras().get("text").toString(),
-                        "testDescription",
-                        "type"
-                );
-
-                mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes").child(key).setValue(qrCode);
-
+                String text = data.getStringExtra("text");
+                String type = data.getStringExtra("type");
+                submitQRCode(text, type);
             }
 
             String text = data != null ? data.getExtras().get("text").toString() : "No QR Code Found.";
@@ -129,6 +122,35 @@ public class HomeActivity extends AppCompatActivity {
                     })
                     .show();
         }
+    }
+
+    private void submitQRCode(String text, String type) {
+        mDatabase.child("users").child(mCurrentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User databaseUser = dataSnapshot.getValue(User.class);
+
+                if (databaseUser != null) {
+                    writeNewQRCode(text, type);
+                    Log.d(TAG, "onDataChange: New QRCode " + text + " added to user " + mCurrentUser.getUid());
+
+                } else {
+                    Log.d(TAG, "onDataChange: User not found in the database. Trying to insert data with a non-existent account");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "onCanceled: Failed to read user from the database");
+            }
+        });
+    }
+
+    private void writeNewQRCode(String text, String type) {
+        String key = mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes").push().getKey();
+
+        QRCode qrCode = new QRCode(text, type, DateUtils.getCurrentDateAsString());
+        mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes").child(key).setValue(qrCode);
     }
 
     public void dialPhoneNumber(String qrPhoneNumber) {
@@ -163,8 +185,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        if (mAuth.getCurrentUser() != null) {
+        if (mCurrentUser != null) {
             mAuth.signOut();
 
             mGoogleSignInClient.signOut().addOnCompleteListener(this,
@@ -192,4 +213,9 @@ public class HomeActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRecyclerView.setAdapter(null);
+    }
 }
