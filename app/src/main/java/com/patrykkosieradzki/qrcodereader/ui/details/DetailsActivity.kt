@@ -39,7 +39,7 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item?.getItemId()) {
+        return when (item?.itemId) {
             android.R.id.home -> {
                 // TODO: Handle walkthrough
                 NavUtils.navigateUpFromSameTask(this)
