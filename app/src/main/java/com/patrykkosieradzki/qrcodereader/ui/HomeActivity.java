@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,9 +16,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
+import android.view.View;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -30,7 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.patrykkosieradzki.qrcodereader.CustomAdapter;
+import com.patrykkosieradzki.qrcodereader.FirebaseBarcodeRecyclerAdapter;
 import com.patrykkosieradzki.qrcodereader.model.QRCode;
 import com.patrykkosieradzki.qrcodereader.R;
 import com.patrykkosieradzki.qrcodereader.model.User;
@@ -38,18 +39,17 @@ import com.patrykkosieradzki.qrcodereader.utils.DateUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class HomeActivity extends AppCompatActivity {
 
+    @BindView(R.id.toolbar) protected Toolbar toolbar;
+    @BindView(R.id.fab) FloatingActionButton fab;
+    @BindView(R.id.recyclerView) protected RecyclerView mRecyclerView;
+
     private static final String TAG = "HomeActivity";
     public static final int QR_READ = 0;
-
-    @BindView(R.id.toolbar) protected Toolbar toolbar;
-    @BindView(R.id.recyclerView) protected RecyclerView mRecyclerView;
-    @BindView(R.id.fab) protected FloatingActionButton fab;
-
-    private CustomAdapter mAdapter;
-    private LinearLayoutManager mLayoutManager;
+    private Handler handler;
 
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -64,6 +64,8 @@ public class HomeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
+        handler = new Handler();
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -73,28 +75,65 @@ public class HomeActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mCurrentUser = mAuth.getCurrentUser();
+
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        fab.setOnClickListener(v -> startActivityForResult(new Intent(HomeActivity.this, QRActivity.class), QR_READ));
+        setRecyclerView();
+        showFAB();
+    }
 
-        mLayoutManager = new LinearLayoutManager(this);
+    public void setRecyclerView() {
+        setLayoutManager();
+        setAdapter();
+
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide(true);
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show(true);
+                }
+            }
+        });
+    }
+
+    private void setLayoutManager() {
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         mLayoutManager.setReverseLayout(true);
         mLayoutManager.setStackFromEnd(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
+    }
 
-        Query query = mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes");
+    private void setAdapter() {
+        Query query = mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes"); // TODO: throws exception when no internet
         query.keepSynced(true);
 
         FirebaseRecyclerOptions options = new FirebaseRecyclerOptions.Builder<QRCode>()
                 .setQuery(query, QRCode.class)
                 .build();
 
-        mAdapter = new CustomAdapter(options);
-        mRecyclerView.setAdapter(mAdapter);
+        FirebaseBarcodeRecyclerAdapter mAdapter = new FirebaseBarcodeRecyclerAdapter(options);
         mAdapter.startListening();
 
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void showFAB() {
+        fab.hide(false);
+        handler.postDelayed(() -> fab.show(true), 400);
+    }
+
+    private void hideFAB() {
+        fab.hide(true);
+    }
+
+    @OnClick(R.id.fab)
+    public void onFABClick() {
+        startActivityForResult(new Intent(HomeActivity.this, QRActivity.class), QR_READ);
     }
 
     @Override
@@ -198,6 +237,18 @@ public class HomeActivity extends AppCompatActivity {
             // TODO: Handle user without google login
 
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        fab.hide(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showFAB();
     }
 
     private void updateLoginState() {

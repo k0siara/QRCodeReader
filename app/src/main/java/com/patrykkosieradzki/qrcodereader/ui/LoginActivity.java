@@ -126,7 +126,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         } else {
-            finishActivity(); // TODO: fix diz shit
+            handleError();
         }
     }
 

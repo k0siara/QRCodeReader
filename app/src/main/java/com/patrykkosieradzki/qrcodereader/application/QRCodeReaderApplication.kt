@@ -3,6 +3,7 @@ package com.patrykkosieradzki.qrcodereader.application
 import android.app.Application
 
 import com.google.firebase.FirebaseApp
+import com.google.firebase.database.FirebaseDatabase
 import com.squareup.leakcanary.LeakCanary
 
 class QRCodeReaderApplication : Application() {
@@ -11,6 +12,7 @@ class QRCodeReaderApplication : Application() {
         super.onCreate()
 
         FirebaseApp.initializeApp(this)
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
         setupLeakCanary()
     }
 
