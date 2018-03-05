@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -31,6 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.client.result.ParsedResultType;
 import com.patrykkosieradzki.qrcodereader.FirebaseBarcodeRecyclerAdapter;
 import com.patrykkosieradzki.qrcodereader.model.QRCode;
 import com.patrykkosieradzki.qrcodereader.R;
@@ -99,6 +101,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     private void setLayoutManager() {
@@ -145,6 +148,7 @@ public class HomeActivity extends AppCompatActivity {
                 String text = data.getStringExtra("text");
                 String type = data.getStringExtra("type");
                 submitQRCode(text, type);
+                showDetails(text, type);
             }
 
             String text = data != null ? data.getExtras().get("text").toString() : "No QR Code Found.";
@@ -157,7 +161,7 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     })
                     .setAction("TEL", v -> {
-                        dialPhoneNumber(text);
+
                     })
                     .show();
         }
@@ -192,11 +196,17 @@ public class HomeActivity extends AppCompatActivity {
         mDatabase.child("users").child(mCurrentUser.getUid()).child("qrCodes").child(key).setValue(qrCode);
     }
 
-    public void dialPhoneNumber(String qrPhoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse(qrPhoneNumber));
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+    private void showDetails(String text, String type) {
+        switch (text) {
+            case "TEXT":
+                break;
+
+            case "URL":
+                break;
+
+            default:
+                // unsupported qr type
+                break;
         }
     }
 
@@ -242,7 +252,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        fab.hide(false);
+        hideFAB();
     }
 
     @Override

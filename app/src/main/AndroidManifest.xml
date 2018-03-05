@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.patrykkosieradzki.qrcodereader">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -15,8 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".ui.MainActivity">
+        <activity android:name=".ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,6 +29,10 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.LoginActivity" />
         <activity android:name=".ui.HomeActivity" />
+        <activity
+            android:name=".ui.details.DetailsActivity"
+            android:parentActivityName=".ui.HomeActivity"
+            tools:targetApi="jelly_bean" />
     </application>
 
 </manifest>

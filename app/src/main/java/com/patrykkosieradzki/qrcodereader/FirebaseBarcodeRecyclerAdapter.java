@@ -1,5 +1,6 @@
 package com.patrykkosieradzki.qrcodereader;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,15 +12,10 @@ import android.widget.TextView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.patrykkosieradzki.qrcodereader.model.QRCode;
+import com.patrykkosieradzki.qrcodereader.ui.details.DetailsActivity;
 
 public class FirebaseBarcodeRecyclerAdapter extends FirebaseRecyclerAdapter<QRCode, FirebaseBarcodeRecyclerAdapter.ViewHolder> {
-    
-    /**
-     * Initialize a {@link RecyclerView.Adapter} that listens to a Firebase query. See
-     * {@link FirebaseRecyclerOptions} for configuration options.
-     *
-     * @param options
-     */
+
     public FirebaseBarcodeRecyclerAdapter(@NonNull FirebaseRecyclerOptions<QRCode> options) {
         super(options);
     }
@@ -37,10 +33,11 @@ public class FirebaseBarcodeRecyclerAdapter extends FirebaseRecyclerAdapter<QRCo
         holder.mText.setText(model.text);
         holder.mDataType.setText(model.type);
 
-        holder.itemView.setOnLongClickListener(view -> {
-            getRef(position).removeValue();
-
-            return true;
+        holder.itemView.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), DetailsActivity.class);
+            intent.putExtra("text", model.text);
+            intent.putExtra("type", model.type);
+            view.getContext().startActivity(intent);
         });
     }
 
