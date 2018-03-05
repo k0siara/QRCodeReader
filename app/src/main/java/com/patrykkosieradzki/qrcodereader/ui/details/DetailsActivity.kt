@@ -29,19 +29,17 @@ class DetailsActivity : AppCompatActivity() {
                 }
             }
         }
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(R.menu.menu_main, menu) // TODO: change later
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             android.R.id.home -> {
-                // TODO: Handle walkthrough
+                // TODO: Handle navigation flow
                 NavUtils.navigateUpFromSameTask(this)
                 true
             }
