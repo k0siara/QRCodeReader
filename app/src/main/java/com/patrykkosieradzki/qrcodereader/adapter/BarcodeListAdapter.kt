@@ -91,7 +91,7 @@ class BarcodeListAdapter(options: FirebaseRecyclerOptions<QRCode>, private val m
             resetIconYAxis(front)
             front.visibility = View.VISIBLE
             front.alpha = 1f
-            if (reverseAllAnimations && animationItemsIndex.get(position, false) || currentSelectedIndex === position) {
+            if (reverseAllAnimations && animationItemsIndex.contains(position) || currentSelectedIndex === position) {
                 FlipAnimator.flipView(mContext, back, front, false)
                 resetCurrentIndex()
             }

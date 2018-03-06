@@ -83,7 +83,7 @@ public class QRActivity extends AppCompatActivity implements ZXingScannerView.Re
         Intent intent = new Intent();
         intent.putExtra("text", text);
         intent.putExtra("type", type);
-        setResult(HomeActivity.QR_READ, intent);
+        setResult(HomeActivity.Companion.getQR_READ(), intent);
         finish();
     }
 

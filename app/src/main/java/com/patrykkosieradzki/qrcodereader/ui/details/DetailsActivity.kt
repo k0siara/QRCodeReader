@@ -3,9 +3,11 @@ package com.patrykkosieradzki.qrcodereader.ui.details
 import android.os.Bundle
 import android.support.v4.app.NavUtils
 import android.support.v7.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
+import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import com.patrykkosieradzki.qrcodereader.R
+import com.patrykkosieradzki.qrcodereader.application.App
+import kotlinx.android.synthetic.main.activity_details.*
+import org.jetbrains.anko.toast
 
 class DetailsActivity : AppCompatActivity() {
 
@@ -13,37 +15,37 @@ class DetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details)
 
-        setSupportActionBar(findViewById(R.id.toolbar))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
         if (savedInstanceState == null) {
-            if (intent.hasExtra("text") && intent.hasExtra("type")) {
-
-                val text = intent.getStringExtra("text")
-                val type = intent.getStringExtra("type")
-                supportActionBar?.title = type
-
+            intent.extras?.let {
                 supportFragmentManager.beginTransaction().run {
-                    replace(R.id.fragment, TextFragment.newInstance(text))
+                    replace(R.id.fragment, TextFragment.newInstance(it.getString("text")))
                     commit()
                 }
+
+                toolbar.title = it.getString("type")
             }
+        }
+
+        initToolbarMenu()
+        enableHomeAsUp()
+    }
+
+    private fun initToolbarMenu() {
+        toolbar.inflateMenu(R.menu.menu_main)
+        toolbar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.action_how_it_works -> true
+                R.id.action_settings -> true
+                R.id.action_logout -> true
+                else -> App.instance.toast("Unknown option")
+            }
+            true
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu) // TODO: change later
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean = when (item?.itemId) {
-            android.R.id.home -> {
-                // TODO: Handle navigation flow
-                NavUtils.navigateUpFromSameTask(this)
-                true
-            }
-
-            else -> super.onOptionsItemSelected(item)
+    private fun enableHomeAsUp() {
+        toolbar.navigationIcon = DrawerArrowDrawable(toolbar.context).apply { progress = 1f }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
     }
 
     override fun onBackPressed() {

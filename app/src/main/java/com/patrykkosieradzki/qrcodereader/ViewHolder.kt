@@ -9,9 +9,11 @@ import kotlinx.android.synthetic.main.row_item.view.*
 class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     fun bind(qrCode: QRCode) {
-        itemView.title.text = qrCode.text
-        itemView.description.text = qrCode.text
-        itemView.secondary_description.text = qrCode.type
+        with(itemView) {
+            title.text = qrCode.text
+            description.text = qrCode.text
+            secondary_description.text = qrCode.type
+        }
 
         setTypeIcon(qrCode.type)
     }

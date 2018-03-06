@@ -6,11 +6,16 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.database.FirebaseDatabase
 import com.squareup.leakcanary.LeakCanary
 
-class QRCodeReaderApplication : Application() {
+class App : Application() {
+
+    companion object {
+        lateinit var instance: App
+    }
 
     override fun onCreate() {
         super.onCreate()
 
+        instance = this
         FirebaseApp.initializeApp(this)
         FirebaseDatabase.getInstance().setPersistenceEnabled(true)
         setupLeakCanary()
