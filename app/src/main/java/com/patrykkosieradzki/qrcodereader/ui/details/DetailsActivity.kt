@@ -36,18 +36,14 @@ class DetailsActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean = when (item?.itemId) {
             android.R.id.home -> {
                 // TODO: Handle navigation flow
                 NavUtils.navigateUpFromSameTask(this)
                 true
             }
 
-
-            else ->
-                super.onOptionsItemSelected(item)
-        }
+            else -> super.onOptionsItemSelected(item)
     }
 
     override fun onBackPressed() {

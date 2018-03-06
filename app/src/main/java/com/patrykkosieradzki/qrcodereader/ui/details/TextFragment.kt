@@ -14,17 +14,14 @@ class TextFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (arguments != null) {
-            text = arguments!!.getString(param)
-        }
+
+        text = arguments?.getString(param)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_text, container, false)
 
-
-        return rootView
+        return inflater.inflate(R.layout.fragment_text, container, false)
     }
 
     companion object {

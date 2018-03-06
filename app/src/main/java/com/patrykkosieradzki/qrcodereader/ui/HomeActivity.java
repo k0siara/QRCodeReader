@@ -30,8 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.patrykkosieradzki.qrcodereader.FirebaseBarcodeRecyclerAdapter;
-import com.patrykkosieradzki.qrcodereader.FirebaseBarcodeRecyclerAdapterListener;
+import com.patrykkosieradzki.qrcodereader.adapter.BarcodeListAdapter;
 import com.patrykkosieradzki.qrcodereader.model.QRCode;
 import com.patrykkosieradzki.qrcodereader.R;
 import com.patrykkosieradzki.qrcodereader.model.User;
@@ -118,35 +117,26 @@ public class HomeActivity extends AppCompatActivity {
                 .setQuery(query, QRCode.class)
                 .build();
 
-        FirebaseBarcodeRecyclerAdapter mAdapter = new FirebaseBarcodeRecyclerAdapter(options, this);
+        BarcodeListAdapter mAdapter = new BarcodeListAdapter(options, this);
         mAdapter.startListening();
 
-        mAdapter.setOnClickListener(new FirebaseBarcodeRecyclerAdapterListener() {
+        mAdapter.setOnClickListener(new BarcodeListAdapter.OnClickListener() {
             @Override
-            public void onIconClicked(QRCode model, int position) {
+            public void onIconClick(QRCode model, int position) {
                 mAdapter.toggleSelection(position);
             }
 
-            @Override
-            public void onIconImportantClicked(QRCode model, int position) {
 
+            @Override
+            public void onContentClick(QRCode model, int position) {
+                Intent intent = new Intent(HomeActivity.this, DetailsActivity.class);
+                intent.putExtra("text", model.text);
+                intent.putExtra("type", model.type);
+                startActivity(intent);
             }
 
             @Override
-            public void onMessageRowClicked(QRCode model, int position) {
-                // TODO: fix memory leak
-                if (mAdapter.isSelection()) {
-                    mAdapter.toggleSelection(position);
-                } else {
-                    Intent intent = new Intent(HomeActivity.this, DetailsActivity.class);
-                    intent.putExtra("text", model.text);
-                    intent.putExtra("type", model.type);
-                    startActivity(intent);
-                }
-            }
-
-            @Override
-            public void onRowLongClicked(QRCode model, int position) {
+            public void onContentLongClick(QRCode model, int position) {
                 mAdapter.toggleSelection(position);
             }
         });
