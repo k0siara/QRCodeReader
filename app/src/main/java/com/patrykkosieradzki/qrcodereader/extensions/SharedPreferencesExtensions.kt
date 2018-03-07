@@ -13,3 +13,4 @@ inline fun SharedPreferences.edit(func: SharedPreferences.Editor.() -> Unit) {
     editor.func()
     editor.apply()
 }
+

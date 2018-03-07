@@ -1,4 +1,4 @@
-package com.patrykkosieradzki.qrcodereader;
+package com.patrykkosieradzki.qrcodereader.ui.home;
 
 
 import android.content.Context;

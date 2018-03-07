@@ -1,6 +1,5 @@
-package com.patrykkosieradzki.qrcodereader.ui
+package com.patrykkosieradzki.qrcodereader.ui.home
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -11,24 +10,17 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.Menu
 import android.view.View
 
 import com.firebase.ui.database.FirebaseRecyclerOptions
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.patrykkosieradzki.qrcodereader.adapter.BarcodeListAdapter
-import com.patrykkosieradzki.qrcodereader.model.QRCode
+import com.patrykkosieradzki.qrcodereader.ui.home.adapter.BarcodeListAdapter
 import com.patrykkosieradzki.qrcodereader.R
-import com.patrykkosieradzki.qrcodereader.model.User
 import com.patrykkosieradzki.qrcodereader.ui.details.DetailsActivity
 import com.patrykkosieradzki.qrcodereader.utils.DateUtils
 
@@ -36,26 +28,34 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.patrykkosieradzki.qrcodereader.application.App
 import com.patrykkosieradzki.qrcodereader.extensions.edit
+import com.patrykkosieradzki.qrcodereader.extensions.getClassName
 import com.patrykkosieradzki.qrcodereader.extensions.getPreferences
+import com.patrykkosieradzki.qrcodereader.logger.Logger
+import com.patrykkosieradzki.qrcodereader.model.QRCode
+import com.patrykkosieradzki.qrcodereader.model.User
+import com.patrykkosieradzki.qrcodereader.ui.LoginActivity
+import com.patrykkosieradzki.qrcodereader.ui.QRActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.content_home.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
 class HomeActivity : AppCompatActivity() {
+    companion object {
+        private const val TAG = "HomeActivity"
+        const val QR_READ = 0
+    }
 
-    private lateinit var mGoogleSignInClient: GoogleSignInClient
-
+    // fake DI
     private lateinit var mAuth: FirebaseAuth
-    private lateinit var mCurrentUser: FirebaseUser
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    private lateinit var mUserDatabase: DatabaseReference
 
-
-    private lateinit var mDatabase: DatabaseReference
-
+    private lateinit var mCurrentUserUID: String
 
     private lateinit var mAdapter: BarcodeListAdapter
 
-    private val handler: Handler = Handler()
+    private lateinit var handler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,22 +63,19 @@ class HomeActivity : AppCompatActivity() {
         ButterKnife.bind(this)
         initToolbarMenu()
 
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+        // fake DI
+        mAuth = App.instance.mAuth
+        mGoogleSignInClient = App.instance.mGoogleSignInClient
+        mUserDatabase = App.instance.mUserDatabase
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+        mCurrentUserUID = mAuth.currentUser?.uid!!
 
-        mAuth = FirebaseAuth.getInstance()
-        mCurrentUser = mAuth.currentUser!!
-
-        mDatabase = FirebaseDatabase.getInstance().reference.child("users")
-
-
+        handler = Handler()
 
         setRecyclerView()
         showFAB()
+
+
     }
 
     private fun setRecyclerView() {
@@ -109,8 +106,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setAdapter() {
-        val query = mDatabase.child(mCurrentUser.uid).child("qrCodes") // TODO: throws exception when no internet
-
+        val query = mUserDatabase.child(mCurrentUserUID).child("qrCodes") // TODO: throws exception when no internet
         val options = FirebaseRecyclerOptions.Builder<QRCode>()
                 .setQuery(query, QRCode::class.java)
                 .build()
@@ -167,13 +163,13 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun submitQRCode(text: String, type: String) {
-        mDatabase.child(mCurrentUser.uid).addListenerForSingleValueEvent(object : ValueEventListener {
+        mUserDatabase.child(mCurrentUserUID).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val databaseUser = dataSnapshot.getValue(User::class.java)
 
                 if (databaseUser != null) {
                     writeNewQRCode(text, type)
-                    Log.d(TAG, "onDataChange: New QRCode " + text + " added to user " + mCurrentUser.uid)
+                    Log.d(TAG, "onDataChange: New QRCode $text added to user $mCurrentUserUID")
 
                 } else {
                     Log.d(TAG, "onDataChange: User not found in the database. Trying to insert data with a non-existent account")
@@ -187,14 +183,15 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun writeNewQRCode(text: String, type: String) {
-        val key = mDatabase.child(mCurrentUser.uid).child("qrCodes").push().key
+        val key = mUserDatabase.child(mCurrentUserUID).child("qrCodes").push().key
 
         val qrCode = QRCode(text, type, DateUtils.getCurrentDateAsString())
-        mDatabase.child(mCurrentUser.uid).child("qrCodes").child(key).setValue(qrCode)
+        mUserDatabase.child(mCurrentUserUID).child("qrCodes").child(key).setValue(qrCode)
     }
 
     private fun initToolbarMenu() {
-        setSupportActionBar(toolbar)
+        toolbar.title = getString(R.string.app_name)
+        toolbar.inflateMenu(R.menu.menu_main)
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_how_it_works -> true
@@ -206,12 +203,10 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
     private fun logout() {
+        mAdapter.stopListening()
+        recyclerView.adapter = null
+
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
@@ -231,7 +226,6 @@ class HomeActivity : AppCompatActivity() {
         showFAB()
 
         mAdapter.startListening()
-        recyclerView.adapter = mAdapter
     }
 
     private fun updateLoginState() {
@@ -251,9 +245,5 @@ class HomeActivity : AppCompatActivity() {
         recyclerView.adapter = null
     }
 
-    companion object {
 
-        private val TAG = "HomeActivity"
-        val QR_READ = 0
-    }
 }

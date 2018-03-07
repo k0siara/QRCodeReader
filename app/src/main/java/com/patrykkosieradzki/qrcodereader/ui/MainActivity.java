@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.firebase.auth.FirebaseAuth;
 import com.patrykkosieradzki.qrcodereader.R;
+import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity;
 
 public class MainActivity extends Activity {
     private static final String TAG = "MainActivity";
@@ -29,6 +29,6 @@ public class MainActivity extends Activity {
     }
 
     private boolean isLoggedIn() {
-        return getSharedPreferences("login", Context.MODE_PRIVATE).getInt("logged_in", 0) == 1;
+        return getPreferences(Context.MODE_PRIVATE).getInt("logged_in", 0) == 1;
     }
 }

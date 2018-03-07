@@ -1,8 +1,9 @@
-package com.patrykkosieradzki.qrcodereader
+package com.patrykkosieradzki.qrcodereader.ui.home
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
+import com.patrykkosieradzki.qrcodereader.R
 import com.patrykkosieradzki.qrcodereader.model.QRCode
 import kotlinx.android.synthetic.main.row_item.view.*
 

@@ -1,4 +1,4 @@
-package com.patrykkosieradzki.qrcodereader.adapter
+package com.patrykkosieradzki.qrcodereader.ui.home.adapter
 
 import android.content.Context
 import android.util.SparseBooleanArray
@@ -9,11 +9,11 @@ import android.widget.RelativeLayout
 import com.firebase.ui.database.FirebaseRecyclerAdapter
 import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.patrykkosieradzki.qrcodereader.R
-import com.patrykkosieradzki.qrcodereader.ViewHolder
-import com.patrykkosieradzki.qrcodereader.model.QRCode
-import com.patrykkosieradzki.qrcodereader.animator.FlipAnimator
+import com.patrykkosieradzki.qrcodereader.ui.home.ViewHolder
+import com.patrykkosieradzki.qrcodereader.ui.home.FlipAnimator
 import com.patrykkosieradzki.qrcodereader.extensions.contains
 import com.patrykkosieradzki.qrcodereader.extensions.inflate
+import com.patrykkosieradzki.qrcodereader.model.QRCode
 import kotlinx.android.synthetic.main.row_item.view.*
 
 class BarcodeListAdapter(options: FirebaseRecyclerOptions<QRCode>, private val mContext: Context)

@@ -1,4 +1,4 @@
-package com.patrykkosieradzki.qrcodereader.animator;
+package com.patrykkosieradzki.qrcodereader.ui.home;
 
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;

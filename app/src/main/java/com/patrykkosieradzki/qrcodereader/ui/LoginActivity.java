@@ -16,7 +16,6 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,13 +23,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.patrykkosieradzki.qrcodereader.R;
-import com.patrykkosieradzki.qrcodereader.model.QRCode;
+import com.patrykkosieradzki.qrcodereader.application.App;
 import com.patrykkosieradzki.qrcodereader.model.User;
+import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity;
 import com.patrykkosieradzki.qrcodereader.utils.DateUtils;
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.HashMap;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -102,7 +101,13 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "signInWithCredential:success");
 
-                        submitUser(task.getResult().getUser());
+                        User user = new User(
+                                task.getResult().getUser().getUid(),
+                                DateUtils.getCurrentDateAsString()
+                        );
+
+                        submitUser(user);
+                        finishActivity();
 
                     } else {
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -118,7 +123,14 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInAnonymously:success uid:" + task.getResult().getUser().getUid());
 
-                            submitUser(task.getResult().getUser());
+
+                            User user = new User(
+                                    task.getResult().getUser().getUid(),
+                                    DateUtils.getCurrentDateAsString()
+                            );
+
+                            submitUser(user);
+                            finishActivity();
 
                         } else {
                             Log.w(TAG, "signInAnonymously:failure", task.getException());
@@ -130,20 +142,19 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void submitUser(FirebaseUser user) {
+    private void submitUser(User user) {
         mDatabase.child("users").child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User databaseUser = dataSnapshot.getValue(User.class);
 
                 if (databaseUser == null) {
-                    writeNewUser(user.getUid());
+                    writeNewUser(user);
                     Log.d(TAG, "onDataChange: New user " + user.getUid() + " added to database");
                 } else {
                     Log.d(TAG, "onDataChange: User already in the database, skipping adding new user to the database");
                 }
 
-                finishActivity();
             }
 
             @Override
@@ -153,11 +164,8 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void writeNewUser(String uid) {
-        String currentDate = DateUtils.getCurrentDateAsString();
-        User mDatabaseUser = new User(currentDate);
-
-        mDatabase.child("users").child(uid).setValue(mDatabaseUser);
+    private void writeNewUser(User user) {
+        mDatabase.child("users").child(user.getUid()).setValue(user);
     }
 
     private void handleError() {
@@ -187,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateLoginState(int state) {
-        SharedPreferences sharedPref = getSharedPreferences("login", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("logged_in", state);
         editor.apply();
