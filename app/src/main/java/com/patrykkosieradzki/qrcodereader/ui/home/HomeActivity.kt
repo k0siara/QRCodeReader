@@ -150,12 +150,10 @@ class HomeActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == QR_READ) {
-            data?.extras?.run {
-                val text = this.get("text").toString()
-                val type = this.get("type").toString()
 
-                val qrCode = QRCode(text, type, DateUtils.currentDateAsString)
-                qrCodeRepository.add(qrCode, object : OnCompleteListener {
+            val qrCode = data?.getSerializableExtra("qrCode")
+            if (qrCode != null) {
+                qrCodeRepository.add(qrCode as QRCode, object : OnCompleteListener {
                     override fun onComplete() {
 
                     }
@@ -167,10 +165,9 @@ class HomeActivity : AppCompatActivity() {
                 })
 
                 //showDetails(text, type)
+            } else {
+                toast("No QR Code Found")
             }
-
-            val text = if (data != null) data.extras!!.get("text")!!.toString() else "No QR Code Found."
-            Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show()
         }
     }
 

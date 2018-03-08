@@ -2,8 +2,10 @@ package com.patrykkosieradzki.qrcodereader.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.io.Serializable;
+
 @IgnoreExtraProperties
-public class QRCode {
+public class QRCode implements Serializable {
 
     public String text;
     public String type;
