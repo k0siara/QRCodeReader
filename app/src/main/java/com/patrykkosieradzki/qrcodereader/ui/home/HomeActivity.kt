@@ -28,11 +28,11 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.patrykkosieradzki.qrcodereader.application.App
 import com.patrykkosieradzki.qrcodereader.extensions.edit
-import com.patrykkosieradzki.qrcodereader.extensions.getClassName
 import com.patrykkosieradzki.qrcodereader.extensions.getPreferences
-import com.patrykkosieradzki.qrcodereader.logger.Logger
 import com.patrykkosieradzki.qrcodereader.model.QRCode
 import com.patrykkosieradzki.qrcodereader.model.User
+import com.patrykkosieradzki.qrcodereader.repository.OnCompleteListener
+import com.patrykkosieradzki.qrcodereader.repository.UserRepository
 import com.patrykkosieradzki.qrcodereader.ui.LoginActivity
 import com.patrykkosieradzki.qrcodereader.ui.QRActivity
 import kotlinx.android.synthetic.main.activity_home.*
@@ -117,6 +117,21 @@ class HomeActivity : AppCompatActivity() {
         mAdapter.setOnClickListener(object : BarcodeListAdapter.OnClickListener {
             override fun onIconClick(model: QRCode, position: Int) {
                 mAdapter.toggleSelection(position)
+
+
+                val repo = UserRepository(mUserDatabase)
+                repo.add(User("321", "123"), object : OnCompleteListener {
+                    override fun onComplete() {
+                        toast("DUPA")
+                    }
+
+                    override fun onError() {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+                })
+
+
+
             }
 
             override fun onContentClick(model: QRCode, position: Int) {

@@ -12,7 +12,6 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -62,7 +61,6 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.7.0'
 
     compile "org.jetbrains.anko:anko:$anko_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:1.2.30"
 }
 
 repositories {

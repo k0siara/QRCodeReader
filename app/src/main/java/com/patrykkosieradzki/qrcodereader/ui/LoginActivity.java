@@ -155,11 +155,13 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "onDataChange: User already in the database, skipping adding new user to the database");
                 }
 
+
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(TAG, "onCanceled: Failed to read user from the database");
+
             }
         });
     }
