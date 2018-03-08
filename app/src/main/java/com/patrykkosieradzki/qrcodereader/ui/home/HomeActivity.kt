@@ -32,6 +32,7 @@ import com.patrykkosieradzki.qrcodereader.extensions.getPreferences
 import com.patrykkosieradzki.qrcodereader.model.QRCode
 import com.patrykkosieradzki.qrcodereader.model.User
 import com.patrykkosieradzki.qrcodereader.repository.OnCompleteListener
+import com.patrykkosieradzki.qrcodereader.repository.QRCodeRepository
 import com.patrykkosieradzki.qrcodereader.repository.UserRepository
 import com.patrykkosieradzki.qrcodereader.ui.LoginActivity
 import com.patrykkosieradzki.qrcodereader.ui.QRActivity
@@ -49,7 +50,9 @@ class HomeActivity : AppCompatActivity() {
     // fake DI
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mGoogleSignInClient: GoogleSignInClient
-    private lateinit var mUserDatabase: DatabaseReference
+    private lateinit var mDatabase: DatabaseReference
+
+    private lateinit var qrCodeRepository: QRCodeRepository
 
     private lateinit var mCurrentUserUID: String
 
@@ -66,16 +69,20 @@ class HomeActivity : AppCompatActivity() {
         // fake DI
         mAuth = App.instance.mAuth
         mGoogleSignInClient = App.instance.mGoogleSignInClient
-        mUserDatabase = App.instance.mUserDatabase
+        mDatabase = App.instance.mDatabase
 
         mCurrentUserUID = mAuth.currentUser?.uid!!
+
+        val query = mDatabase.child("users").child(mCurrentUserUID).child("qrCodes")
+        qrCodeRepository = QRCodeRepository(query)
+
 
         handler = Handler()
 
         setRecyclerView()
         showFAB()
 
-
+        fab.setOnClickListener { startActivityForResult(Intent(this, QRActivity::class.java), QR_READ) }
     }
 
     private fun setRecyclerView() {
@@ -106,7 +113,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setAdapter() {
-        val query = mUserDatabase.child(mCurrentUserUID).child("qrCodes") // TODO: throws exception when no internet
+        val query = mDatabase.child("users").child(mCurrentUserUID).child("qrCodes") // TODO: throws exception when no internet TODO: change to "barcodes"
         val options = FirebaseRecyclerOptions.Builder<QRCode>()
                 .setQuery(query, QRCode::class.java)
                 .build()
@@ -117,21 +124,6 @@ class HomeActivity : AppCompatActivity() {
         mAdapter.setOnClickListener(object : BarcodeListAdapter.OnClickListener {
             override fun onIconClick(model: QRCode, position: Int) {
                 mAdapter.toggleSelection(position)
-
-
-                val repo = UserRepository(mUserDatabase)
-                repo.add(User("321", "123"), object : OnCompleteListener {
-                    override fun onComplete() {
-                        toast("DUPA")
-                    }
-
-                    override fun onError() {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                    }
-                })
-
-
-
             }
 
             override fun onContentClick(model: QRCode, position: Int) {
@@ -155,12 +147,6 @@ class HomeActivity : AppCompatActivity() {
         fab.hide(true)
     }
 
-    @OnClick(R.id.fab)
-    fun onFABClick() {
-        startActivityForResult(Intent(this, QRActivity::class.java), QR_READ)
-
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == QR_READ) {
@@ -168,40 +154,24 @@ class HomeActivity : AppCompatActivity() {
                 val text = this.get("text").toString()
                 val type = this.get("type").toString()
 
-                submitQRCode(text, type)
+                val qrCode = QRCode(text, type, DateUtils.currentDateAsString)
+                qrCodeRepository.add(qrCode, object : OnCompleteListener {
+                    override fun onComplete() {
+
+                    }
+
+                    override fun onError() {
+
+                    }
+
+                })
+
                 //showDetails(text, type)
             }
 
             val text = if (data != null) data.extras!!.get("text")!!.toString() else "No QR Code Found."
             Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG).show()
         }
-    }
-
-    private fun submitQRCode(text: String, type: String) {
-        mUserDatabase.child(mCurrentUserUID).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val databaseUser = dataSnapshot.getValue(User::class.java)
-
-                if (databaseUser != null) {
-                    writeNewQRCode(text, type)
-                    Log.d(TAG, "onDataChange: New QRCode $text added to user $mCurrentUserUID")
-
-                } else {
-                    Log.d(TAG, "onDataChange: User not found in the database. Trying to insert data with a non-existent account")
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                Log.w(TAG, "onCanceled: Failed to read user from the database")
-            }
-        })
-    }
-
-    private fun writeNewQRCode(text: String, type: String) {
-        val key = mUserDatabase.child(mCurrentUserUID).child("qrCodes").push().key
-
-        val qrCode = QRCode(text, type, DateUtils.getCurrentDateAsString())
-        mUserDatabase.child(mCurrentUserUID).child("qrCodes").child(key).setValue(qrCode)
     }
 
     private fun initToolbarMenu() {

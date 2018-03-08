@@ -15,13 +15,13 @@ public class User {
     public String createdAt;
     public Map<String, QRCode> qrCodes;
 
-    public User() {}
-
     public User(String uid, String createdAt) {
         this.uid = uid;
         this.createdAt = createdAt;
         this.qrCodes = new HashMap<>();
     }
+
+    public User() {}
 
     public String getUid() {
         return uid;

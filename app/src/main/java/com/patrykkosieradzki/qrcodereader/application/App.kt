@@ -22,7 +22,7 @@ class App : Application() {
     lateinit var mAuth: FirebaseAuth
     lateinit var mGoogleSignInClient: GoogleSignInClient
 
-    lateinit var mUserDatabase: DatabaseReference
+    lateinit var mDatabase: DatabaseReference
 
     override fun onCreate() {
         super.onCreate()
@@ -46,7 +46,7 @@ class App : Application() {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        mUserDatabase = FirebaseDatabase.getInstance().reference.child("users")
+        mDatabase = FirebaseDatabase.getInstance().reference
     }
 
     private fun setupLeakCanary() {
