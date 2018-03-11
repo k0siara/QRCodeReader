@@ -25,8 +25,14 @@ import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity
 import com.patrykkosieradzki.qrcodereader.utils.DateUtils
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils
 import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.startActivity
 
 class LoginActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "LoginActivity"
+        private const val RC_SIGN_IN = 0
+    }
 
     // fake DI
     private lateinit var mGoogleSignInClient: GoogleSignInClient
@@ -40,15 +46,18 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // fake DI
-        mGoogleSignInClient = App.instance.mGoogleSignInClient
-        mAuth = App.instance.mAuth
-
-        mDatabase = App.instance.mDatabase
+        fakeDI()
         userRepository = UserRepository(mDatabase.child("users"))
 
         signInButton.setOnClickListener { startActivityForResult(mGoogleSignInClient.signInIntent, RC_SIGN_IN) }
         continueWithoutSigningInButton.setOnClickListener { firebaseAnonymousAuth() }
+    }
+
+    private fun fakeDI() {
+        mGoogleSignInClient = App.instance.mGoogleSignInClient
+        mAuth = App.instance.mAuth
+
+        mDatabase = App.instance.mDatabase
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -151,7 +160,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun finishActivity() {
         updateLoginState(1)
-        startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+        startActivity<HomeActivity>()
         finish()
     }
 
@@ -162,9 +171,6 @@ class LoginActivity : AppCompatActivity() {
 
     }
 
-    companion object {
-        private const val TAG = "LoginActivity"
-        private const val RC_SIGN_IN = 0
-    }
+
 
 }
