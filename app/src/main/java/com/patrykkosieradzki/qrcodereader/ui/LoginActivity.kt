@@ -28,6 +28,9 @@ import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.startActivity
 
 class LoginActivity : AppCompatActivity() {
+    enum class SignInOption {
+        GOOGLE, ANONYMOUS
+    }
 
     companion object {
         private const val TAG = "LoginActivity"
@@ -49,8 +52,8 @@ class LoginActivity : AppCompatActivity() {
         fakeDI()
         userRepository = UserRepository(mDatabase.child("users"))
 
-        signInButton.setOnClickListener { startActivityForResult(mGoogleSignInClient.signInIntent, RC_SIGN_IN) }
-        continueWithoutSigningInButton.setOnClickListener { firebaseAnonymousAuth() }
+        signInButton.setOnClickListener { signIn(SignInOption.GOOGLE) }
+        continueWithoutSigningInButton.setOnClickListener { signIn(SignInOption.ANONYMOUS) }
     }
 
     private fun fakeDI() {
@@ -58,6 +61,13 @@ class LoginActivity : AppCompatActivity() {
         mAuth = App.instance.mAuth
 
         mDatabase = App.instance.mDatabase
+    }
+
+    private fun signIn(option: SignInOption) {
+        when (option) {
+            SignInOption.GOOGLE -> startActivityForResult(mGoogleSignInClient.signInIntent, RC_SIGN_IN)
+            SignInOption.ANONYMOUS -> firebaseAnonymousAuth()
+        }
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
