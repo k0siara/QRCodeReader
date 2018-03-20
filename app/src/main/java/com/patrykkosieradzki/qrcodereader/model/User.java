@@ -2,6 +2,7 @@ package com.patrykkosieradzki.qrcodereader.model;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.patrykkosieradzki.qrcodereader.utils.DateUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,9 +16,9 @@ public class User {
     public String createdAt;
     public Map<String, QRCode> qrCodes;
 
-    public User(String uid, String createdAt) {
+    public User(String uid) {
         this.uid = uid;
-        this.createdAt = createdAt;
+        this.createdAt = DateUtils.INSTANCE.getCurrentDateAsString();
         this.qrCodes = new HashMap<>();
     }
 

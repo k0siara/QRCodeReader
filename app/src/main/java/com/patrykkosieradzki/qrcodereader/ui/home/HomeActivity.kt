@@ -3,39 +3,26 @@ package com.patrykkosieradzki.qrcodereader.ui.home
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
-
+import butterknife.ButterKnife
 import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
-import com.patrykkosieradzki.qrcodereader.ui.home.adapter.BarcodeListAdapter
 import com.patrykkosieradzki.qrcodereader.R
-import com.patrykkosieradzki.qrcodereader.ui.details.DetailsActivity
-import com.patrykkosieradzki.qrcodereader.utils.DateUtils
-
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.patrykkosieradzki.qrcodereader.application.App
-import com.patrykkosieradzki.qrcodereader.extensions.edit
-import com.patrykkosieradzki.qrcodereader.extensions.getPreferences
 import com.patrykkosieradzki.qrcodereader.model.QRCode
-import com.patrykkosieradzki.qrcodereader.model.User
 import com.patrykkosieradzki.qrcodereader.repository.OnCompleteListener
 import com.patrykkosieradzki.qrcodereader.repository.QRCodeRepository
-import com.patrykkosieradzki.qrcodereader.repository.UserRepository
 import com.patrykkosieradzki.qrcodereader.ui.LoginActivity
 import com.patrykkosieradzki.qrcodereader.ui.QRActivity
+import com.patrykkosieradzki.qrcodereader.ui.details.DetailsActivity
+import com.patrykkosieradzki.qrcodereader.ui.home.adapter.BarcodeListAdapter
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.content_home.*
 import org.jetbrains.anko.startActivity
@@ -64,10 +51,7 @@ class HomeActivity : AppCompatActivity() {
         ButterKnife.bind(this)
         initToolbarMenu()
 
-        // fake DI
-        mAuth = App.instance.mAuth
-        mGoogleSignInClient = App.instance.mGoogleSignInClient
-        mDatabase = App.instance.mDatabase
+        fakeDI()
 
         val query = mDatabase.child("users").child(mAuth.currentUser!!.uid).child("qrCodes")
         qrCodeRepository = QRCodeRepository(query)
@@ -79,6 +63,12 @@ class HomeActivity : AppCompatActivity() {
         showFAB()
 
         fab.setOnClickListener { startActivityForResult(Intent(this, QRActivity::class.java), QR_READ) }
+    }
+
+    private fun fakeDI() {
+        mAuth = App.instance.mAuth
+        mGoogleSignInClient = App.instance.mGoogleSignInClient
+        mDatabase = App.instance.mDatabase
     }
 
     private fun setRecyclerView() {
@@ -149,22 +139,26 @@ class HomeActivity : AppCompatActivity() {
 
             val qrCode = data?.getSerializableExtra("qrCode")
             if (qrCode != null) {
-                qrCodeRepository.add(qrCode as QRCode, object : OnCompleteListener {
-                    override fun onComplete() {
-
-                    }
-
-                    override fun onError() {
-
-                    }
-
-                })
-
+                saveQRToDatabase(qrCode as QRCode)
                 //showDetails(text, type)
+
             } else {
-                toast("No QR Code Found")
+                App.instance.toast("No QR Code Found")
             }
         }
+    }
+
+    private fun saveQRToDatabase(qrCode: QRCode) {
+        qrCodeRepository.add(qrCode, object : OnCompleteListener {
+            override fun onComplete() {
+
+            }
+
+            override fun onError() {
+
+            }
+
+        })
     }
 
     private fun initToolbarMenu() {

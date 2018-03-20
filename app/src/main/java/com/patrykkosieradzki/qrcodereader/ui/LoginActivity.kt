@@ -1,5 +1,6 @@
 package com.patrykkosieradzki.qrcodereader.ui
 
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -25,7 +26,10 @@ import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity
 import com.patrykkosieradzki.qrcodereader.utils.DateUtils
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils
 import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.indeterminateProgressDialog
+import org.jetbrains.anko.progressDialog
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 
 class LoginActivity : AppCompatActivity() {
     enum class SignInOption {
@@ -44,6 +48,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var mDatabase: DatabaseReference
     private lateinit var userRepository: UserRepository
 
+    private lateinit var dialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +56,8 @@ class LoginActivity : AppCompatActivity() {
 
         fakeDI()
         userRepository = UserRepository(mDatabase.child("users"))
+
+        dialog = indeterminateProgressDialog(message = "Signing in...")
 
         signInButton.setOnClickListener { signIn(SignInOption.GOOGLE) }
         continueWithoutSigningInButton.setOnClickListener { signIn(SignInOption.ANONYMOUS) }
@@ -64,9 +71,13 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun signIn(option: SignInOption) {
-        when (option) {
-            SignInOption.GOOGLE -> startActivityForResult(mGoogleSignInClient.signInIntent, RC_SIGN_IN)
-            SignInOption.ANONYMOUS -> firebaseAnonymousAuth()
+        if (DeviceUtils.isNetworkAvailable(this)) {
+            when (option) {
+                SignInOption.GOOGLE -> startActivityForResult(mGoogleSignInClient.signInIntent, RC_SIGN_IN)
+                SignInOption.ANONYMOUS -> firebaseAnonymousAuth()
+            }
+        } else {
+            App.instance.toast("No internet connection")
         }
     }
 
@@ -80,84 +91,60 @@ class LoginActivity : AppCompatActivity() {
                 firebaseAuthWithGoogle(account)
 
             } catch (e: ApiException) {
+                App.instance.toast("Authentication failed.")
                 Log.w(TAG, "Google sign in failed", e)
-                handleError()
             }
-
         }
     }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + account.id!!)
 
-        // TODO: add progress dialog
+        dialog.show()
+
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        Log.d(TAG, "signInWithCredential:success")
+        mAuth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                Log.d(TAG, "signInWithCredential:success")
 
-                        val uid = task.result.user.uid
-                        val currentDate = DateUtils.currentDateAsString
-                        val user = User(uid, currentDate)
+                val uid = task.result.user.uid
+                saveUserToDatabase(User(uid))
 
-                        userRepository.add(user, object : OnCompleteListener {
-                            override fun onComplete() {
-                                finishActivity()
-                            }
-
-                            override fun onError() {
-                                // TODO: Handle error
-                            }
-                        })
-
-
-                    } else {
-                        Log.w(TAG, "signInWithCredential:failure", task.exception)
-                        handleError()
-                    }
-                }
+            } else {
+                App.instance.toast("Authentication failed.")
+                Log.w(TAG, "signInWithCredential:failure", task.exception)
+            }
+        }
     }
 
     private fun firebaseAnonymousAuth() {
-        if (DeviceUtils.isNetworkAvailable(this)) {
-            mAuth.signInAnonymously()
-                    .addOnCompleteListener(this) { task ->
-                        if (task.isSuccessful) {
-                            Log.d(TAG, "signInAnonymously:success uid:" + task.result.user.uid)
+        dialog.show()
 
-                            val uid = task.result.user.uid
-                            val currentDate = DateUtils.currentDateAsString
-                            val user = User(uid, currentDate)
+        mAuth.signInAnonymously().addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                Log.d(TAG, "signInAnonymously:success uid:" + task.result.user.uid)
 
-                            userRepository.add(user, object : OnCompleteListener {
-                                override fun onComplete() {
-                                    finishActivity()
-                                }
+                val uid = task.result.user.uid
+                saveUserToDatabase(User(uid))
 
-                                override fun onError() {
-                                    // TODO: Handle error
-                                }
-                            })
-
-                        } else {
-                            Log.w(TAG, "signInAnonymously:failure", task.exception)
-                            handleError()
-                        }
-                    }
-        } else {
-            handleError()
+            } else {
+                App.instance.toast("Authentication failed.")
+                Log.w(TAG, "signInAnonymously:failure", task.exception)
+            }
         }
     }
 
-    private fun handleError() {
-        val text: String = if (!DeviceUtils.isNetworkAvailable(applicationContext)) {
-            "No network connection available."
-        } else {
-            "Authentication failed."
-        }
+    private fun saveUserToDatabase(user: User) {
+        userRepository.add(user, object : OnCompleteListener {
+            override fun onComplete() {
+                dialog.hide()
+                finishActivity()
+            }
 
-        Snackbar.make(layout, text, Snackbar.LENGTH_SHORT).show()
+            override fun onError() {
+                // TODO: Handle error
+            }
+        })
     }
 
     override fun onResume() {
