@@ -21,8 +21,8 @@ class BarcodeListAdapter(options: FirebaseRecyclerOptions<QRCode>, private val m
 
     interface OnClickListener {
         fun onIconClick(model: QRCode, position: Int)
-        fun onContentClick(model: QRCode, position: Int)
-        fun onContentLongClick(model: QRCode, position: Int)
+        fun onClick(model: QRCode, position: Int)
+        fun onLongClick(model: QRCode, position: Int)
     }
 
     private var selectedItems: SparseBooleanArray = SparseBooleanArray()
@@ -51,11 +51,11 @@ class BarcodeListAdapter(options: FirebaseRecyclerOptions<QRCode>, private val m
         })
 
         holder.itemView.content_container.setOnClickListener({
-            mFirebaseBarcodeRecyclerAdapterListener.onContentClick(model, position)
+            mFirebaseBarcodeRecyclerAdapterListener.onClick(model, position)
         })
 
         holder.itemView.content_container.setOnLongClickListener({
-            mFirebaseBarcodeRecyclerAdapterListener.onContentLongClick(model, position)
+            mFirebaseBarcodeRecyclerAdapterListener.onLongClick(model, position)
             true
         })
     }

@@ -112,11 +112,11 @@ class HomeActivity : AppCompatActivity() {
                 mAdapter.toggleSelection(position)
             }
 
-            override fun onContentClick(model: QRCode, position: Int) {
+            override fun onClick(model: QRCode, position: Int) {
                 startActivity<DetailsActivity>("text" to model.text, "type" to model.type)
             }
 
-            override fun onContentLongClick(model: QRCode, position: Int) {
+            override fun onLongClick(model: QRCode, position: Int) {
                 mAdapter.toggleSelection(position)
             }
         })
