@@ -54,8 +54,6 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var qrCodeRepository: QRCodeRepository
 
-    private lateinit var mCurrentUserUID: String
-
     private lateinit var mAdapter: BarcodeListAdapter
 
     private lateinit var handler: Handler
@@ -71,9 +69,7 @@ class HomeActivity : AppCompatActivity() {
         mGoogleSignInClient = App.instance.mGoogleSignInClient
         mDatabase = App.instance.mDatabase
 
-        mCurrentUserUID = mAuth.currentUser?.uid!!
-
-        val query = mDatabase.child("users").child(mCurrentUserUID).child("qrCodes")
+        val query = mDatabase.child("users").child(mAuth.currentUser!!.uid).child("qrCodes")
         qrCodeRepository = QRCodeRepository(query)
 
 
@@ -113,7 +109,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setAdapter() {
-        val query = mDatabase.child("users").child(mCurrentUserUID).child("qrCodes") // TODO: throws exception when no internet TODO: change to "barcodes"
+        val query = mDatabase.child("users").child(mAuth.currentUser!!.uid).child("qrCodes") // TODO: throws exception when no internet TODO: change to "barcodes"
         val options = FirebaseRecyclerOptions.Builder<QRCode>()
                 .setQuery(query, QRCode::class.java)
                 .build()
@@ -192,7 +188,6 @@ class HomeActivity : AppCompatActivity() {
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
-            updateLoginState()
             startActivity<LoginActivity>()
             finish()
         }
@@ -208,12 +203,6 @@ class HomeActivity : AppCompatActivity() {
         showFAB()
 
         mAdapter.startListening()
-    }
-
-    private fun updateLoginState() {
-        getPreferences().edit {
-            putInt("logged_in", 0)
-        }
     }
 
     override fun onStop() {

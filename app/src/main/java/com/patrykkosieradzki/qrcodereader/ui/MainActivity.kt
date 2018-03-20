@@ -21,7 +21,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (FirebaseAuth.getInstance().currentUser == null && !isLoggedIn()) {
+        if (FirebaseAuth.getInstance().currentUser == null) {
             startActivity<LoginActivity>()
         } else {
             startActivity<HomeActivity>()
@@ -29,10 +29,5 @@ class MainActivity : Activity() {
 
         finish()
     }
-
-    private fun isLoggedIn(): Boolean {
-        return getPreferences().getInt("logged_in", 0) == 1
-    }
-
 
 }

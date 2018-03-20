@@ -169,18 +169,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun finishActivity() {
-        updateLoginState(1)
         startActivity<HomeActivity>()
         finish()
     }
-
-    private fun updateLoginState(state: Int) {
-        getPreferences().edit {
-            putInt("logged_in", state)
-        }
-
-    }
-
 
 
 }

@@ -1,10 +1,12 @@
 package com.patrykkosieradzki.qrcodereader.repository
 
 import android.util.Log
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.patrykkosieradzki.qrcodereader.model.QRCode
 import com.patrykkosieradzki.qrcodereader.model.User
-import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity
 
 class QRCodeRepository(private val database: DatabaseReference) : Repository<QRCode> {
 
