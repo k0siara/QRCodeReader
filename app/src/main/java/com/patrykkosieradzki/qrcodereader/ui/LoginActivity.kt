@@ -26,18 +26,14 @@ import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity
 import com.patrykkosieradzki.qrcodereader.utils.DateUtils
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils
 import kotlinx.android.synthetic.main.activity_login.*
-import org.jetbrains.anko.indeterminateProgressDialog
-import org.jetbrains.anko.progressDialog
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), AnkoLogger {
     enum class SignInOption {
         GOOGLE, ANONYMOUS
     }
 
     companion object {
-        private const val TAG = "LoginActivity"
         private const val RC_SIGN_IN = 0
     }
 
@@ -93,27 +89,27 @@ class LoginActivity : AppCompatActivity() {
 
             } catch (e: ApiException) {
                 App.instance.toast("Authentication failed.")
-                Log.w(TAG, "Google sign in failed", e)
+                warn("Google sign in failed", e)
             }
         }
     }
 
     private fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + account.id!!)
+        debug("firebaseAuthWithGoogle:" + account.id!!)
 
         dialog.show()
 
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
         mAuth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
-                Log.d(TAG, "signInWithCredential:success")
+                debug("signInWithCredential:success")
 
                 val uid = task.result.user.uid
                 saveUserToDatabase(User(uid))
 
             } else {
                 App.instance.toast("Authentication failed.")
-                Log.w(TAG, "signInWithCredential:failure", task.exception)
+                warn("signInWithCredential:failure", task.exception)
             }
         }
     }
@@ -123,14 +119,14 @@ class LoginActivity : AppCompatActivity() {
 
         mAuth.signInAnonymously().addOnCompleteListener(this) { task ->
             if (task.isSuccessful) {
-                Log.d(TAG, "signInAnonymously:success uid:" + task.result.user.uid)
+                debug("signInAnonymously:success uid:" + task.result.user.uid)
 
                 val uid = task.result.user.uid
                 saveUserToDatabase(User(uid))
 
             } else {
                 App.instance.toast("Authentication failed.")
-                Log.w(TAG, "signInAnonymously:failure", task.exception)
+                warn("signInAnonymously:failure", task.exception)
             }
         }
     }

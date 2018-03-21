@@ -9,7 +9,6 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import butterknife.ButterKnife
 import com.firebase.ui.database.FirebaseRecyclerOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth
@@ -25,13 +24,13 @@ import com.patrykkosieradzki.qrcodereader.ui.details.DetailsActivity
 import com.patrykkosieradzki.qrcodereader.ui.home.adapter.BarcodeListAdapter
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.content_home.*
+import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity(), AnkoLogger {
     companion object {
-        private const val TAG = "HomeActivity"
-        const val QR_READ = 0
+        private const val QR_READ = 0
     }
 
     // fake DI
