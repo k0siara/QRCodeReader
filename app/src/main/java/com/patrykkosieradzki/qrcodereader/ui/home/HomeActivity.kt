@@ -175,12 +175,12 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        mAdapter.stopListening()
-        recyclerView.adapter = null
-
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
+            mAdapter.stopListening()
+            recyclerView.adapter = null
+
             startActivity<LoginActivity>()
             finish()
         }

@@ -58,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
         userRepository = UserRepository(mDatabase.child("users"))
 
         dialog = indeterminateProgressDialog(message = "Signing in...")
+        dialog.hide()
 
         signInButton.setOnClickListener { signIn(SignInOption.GOOGLE) }
         continueWithoutSigningInButton.setOnClickListener { signIn(SignInOption.ANONYMOUS) }
