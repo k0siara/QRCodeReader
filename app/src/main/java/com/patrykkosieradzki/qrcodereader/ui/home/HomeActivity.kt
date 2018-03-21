@@ -178,9 +178,6 @@ class HomeActivity : AppCompatActivity() {
         mAuth.signOut()
 
         mGoogleSignInClient.signOut().addOnCompleteListener(this) {
-            mAdapter.stopListening()
-            recyclerView.adapter = null
-
             startActivity<LoginActivity>()
             finish()
         }
@@ -193,9 +190,8 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        showFAB()
-
         mAdapter.startListening()
+        showFAB()
     }
 
     override fun onStop() {
