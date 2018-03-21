@@ -161,16 +161,18 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initToolbarMenu() {
-        toolbar.title = getString(R.string.app_name)
-        toolbar.inflateMenu(R.menu.menu_main)
-        toolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.action_how_it_works -> true
-                R.id.action_settings -> true
-                R.id.action_logout -> logout()
-                else -> App.instance.toast("Unknown option")
+        toolbar.apply {
+            title = getString(R.string.app_name)
+            inflateMenu(R.menu.menu_main)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.action_how_it_works -> true
+                    R.id.action_settings -> true
+                    R.id.action_logout -> logout()
+                    else -> App.instance.toast("Unknown option")
+                }
+                true
             }
-            true
         }
     }
 
