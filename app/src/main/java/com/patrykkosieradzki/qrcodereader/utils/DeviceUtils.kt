@@ -16,10 +16,6 @@ object DeviceUtils {
         return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun requestPermission(activity: Activity, permission: String, requestCode: Int) {
-        ActivityCompat.requestPermissions(activity, arrayOf(permission), requestCode)
-    }
-
     fun isNetworkAvailable(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
