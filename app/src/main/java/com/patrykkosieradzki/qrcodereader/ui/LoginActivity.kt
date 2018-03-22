@@ -53,8 +53,7 @@ class LoginActivity : AppCompatActivity(), AnkoLogger {
         fakeDI()
         userRepository = UserRepository(mDatabase.child("users"))
 
-        dialog = indeterminateProgressDialog(message = "Signing in...")
-        dialog.hide()
+        dialog = indeterminateProgressDialog(message = "Signing in...").apply { hide() }
 
         signInButton.setOnClickListener { signIn(SignInOption.GOOGLE) }
         continueWithoutSigningInButton.setOnClickListener { signIn(SignInOption.ANONYMOUS) }
@@ -81,15 +80,17 @@ class LoginActivity : AppCompatActivity(), AnkoLogger {
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RC_SIGN_IN) {
-            try {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account)
+        when (requestCode) {
+            RC_SIGN_IN -> {
+                try {
+                    val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                    val account = task.getResult(ApiException::class.java)
+                    firebaseAuthWithGoogle(account)
 
-            } catch (e: ApiException) {
-                App.instance.toast("Authentication failed.")
-                warn("Google sign in failed", e)
+                } catch (e: ApiException) {
+                    App.instance.toast("Authentication failed.")
+                    warn("Google sign in failed", e)
+                }
             }
         }
     }

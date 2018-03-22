@@ -1,33 +1,35 @@
 package com.patrykkosieradzki.qrcodereader.repository
 
-import android.util.Log
 import com.google.firebase.database.*
 import com.patrykkosieradzki.qrcodereader.model.User
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.debug
+import org.jetbrains.anko.warn
 
-class UserRepository(private val database: DatabaseReference) : Repository<User> {
+class UserRepository(private var database: DatabaseReference) : Repository<User>, AnkoLogger {
 
-    companion object {
-        val TAG: String = "UserRepository"
+    init {
+        database = database.child("users")
     }
 
     override fun add(user: User, listener: OnCompleteListener?) {
         database.child(user.uid).addListenerForSingleValueEvent(object : ValueEventListener {
-
             override fun onDataChange(dataSnapshot: DataSnapshot?) {
                 val databaseUser = dataSnapshot?.getValue(User::class.java)
 
                 if (databaseUser == null) {
                     database.child(user.uid).setValue(user)
-                    Log.d(TAG, """onDataChange: New user ${user.uid} added to database""")
+                    debug("onDataChange: New user ${user.uid} added to database")
                 } else {
-                    Log.d(TAG, "onDataChange: User already in the database, skipping adding new user to the database")
+                    debug("onDataChange: User already in the database, skipping adding new user to the database")
                 }
 
                 listener?.onComplete()
             }
 
             override fun onCancelled(databaseError: DatabaseError?) {
-                Log.w(TAG, "onCanceled: Failed to read user from the database")
+                warn("onCanceled: Failed to read user from the database")
+                warn("Cause: ${databaseError.toString()}}")
                 listener?.onError()
             }
 

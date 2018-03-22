@@ -30,7 +30,7 @@ import org.jetbrains.anko.toast
 
 class HomeActivity : AppCompatActivity(), AnkoLogger {
     companion object {
-        private const val QR_READ = 0
+        const val QR_READ = 0
     }
 
     // fake DI
@@ -51,9 +51,7 @@ class HomeActivity : AppCompatActivity(), AnkoLogger {
 
         fakeDI()
 
-        val query = mDatabase.child("users").child(mAuth.currentUser!!.uid).child("qrCodes")
-        qrCodeRepository = QRCodeRepository(query)
-
+        qrCodeRepository = QRCodeRepository(mDatabase, mAuth.currentUser!!.uid)
 
         handler = Handler()
 
@@ -97,7 +95,7 @@ class HomeActivity : AppCompatActivity(), AnkoLogger {
     }
 
     private fun setAdapter() {
-        val query = mDatabase.child("users").child(mAuth.currentUser!!.uid).child("qrCodes") // TODO: throws exception when no internet TODO: change to "barcodes"
+        val query = qrCodeRepository.query() // TODO: throws exception when no internet TODO: change to "barcodes"
         val options = FirebaseRecyclerOptions.Builder<QRCode>()
                 .setQuery(query, QRCode::class.java)
                 .build()

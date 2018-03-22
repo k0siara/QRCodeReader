@@ -44,8 +44,11 @@ class DetailsActivity : AppCompatActivity() {
     }
 
     private fun enableHomeAsUp() {
-        toolbar.navigationIcon = DrawerArrowDrawable(toolbar.context).apply { progress = 1f }
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        toolbar.apply {
+            navigationIcon = DrawerArrowDrawable(toolbar.context).apply { progress = 1f }
+            setNavigationOnClickListener { onBackPressed() }
+        }
+
     }
 
     override fun onBackPressed() {
