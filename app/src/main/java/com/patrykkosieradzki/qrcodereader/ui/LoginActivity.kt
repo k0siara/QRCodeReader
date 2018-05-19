@@ -20,7 +20,7 @@ import com.patrykkosieradzki.qrcodereader.repository.OnCompleteListener
 import com.patrykkosieradzki.qrcodereader.repository.UserRepository
 import com.patrykkosieradzki.qrcodereader.ui.home.HomeActivity
 import com.patrykkosieradzki.qrcodereader.utils.DeviceUtils
-import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.activity_login222.*
 import org.jetbrains.anko.*
 
 class LoginActivity : AppCompatActivity(), AnkoLogger {
